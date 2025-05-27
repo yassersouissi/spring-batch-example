@@ -1,11 +1,9 @@
-# Utilise une image Java légère
-FROM openjdk:17-jdk-slim
-
-# Répertoire de travail dans le conteneur
+FROM maven:3.9.1-eclipse-temurin-17-alpine AS build
 WORKDIR /app
+COPY --chown=maven:maven . /app
+RUN mvn clean package -DskipTests
 
-# Copie le fichier .jar compilé dans l’image Docker
-COPY target/*.jar app.jar
-
-# Point d'entrée
+FROM eclipse-temurin:17-alpine
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
 ENTRYPOINT ["java", "-jar", "app.jar"]
