@@ -1,9 +1,12 @@
-FROM maven:3.9.1-eclipse-temurin-17-alpine AS build
-WORKDIR /app
-COPY --chown=maven:maven . /app
-RUN mvn clean package -DskipTests
 
-FROM eclipse-temurin:17-alpine
+FROM openjdk:17-jdk-slim
 WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+# Copy the JAR
+COPY target/*.jar app.jar
+
+# Copy the application.properties file
+COPY src/main/resources/application.properties ./application.properties
+
+# Run the app with explicit config location
+CMD ["java", "-Dspring.config.location=file:./application.properties", "-DwebAllowOthers=true", "-jar", "app.jar"]
